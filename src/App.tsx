@@ -53,38 +53,43 @@ export const App: FC = () => {
     return await audioContextRef.current.decodeAudioData(arrayBuffer);
   }, [])
 
-  // const createLoopBuffer = useCallback(async () => {
-  //   if (!audioContextRef.current || !audioBuffers) return;
-
-  //   let totalDuration = 0;
-  //   const buffers: AudioBuffer[] = [];
-  //   const states: State[] = ["b", "し", "か", "の", "こ", "の", "こ", "の", "こ", "こ", "し", "た", "ん", "た", "ん", "b"]
-  //   for (const state of states) {
-  //     const buffer = audioBuffers[state];
-  //     buffers.push(buffer)
-  //     totalDuration += buffer.duration;
+  // const transitionToNextState = useCallback(() => {
+  //   const currentIndex = states.indexOf(currentState);
+  //   let nextStateIndex = 0;
+  //   const randomValue = Math.random();
+  //   let cumulativeProbability = 0;
+  //   for (let i = 0; i < 7; i++) {
+  //     cumulativeProbability += P[currentIndex][i];
+  //     if (randomValue < cumulativeProbability) {
+  //       nextStateIndex = i;
+  //       break;
+  //     }
   //   }
+  //   const nextState = states[nextStateIndex];
+  //   setCurrentState(nextState);
+  //   playSound(nextState);
+  // }, [currentState, playSound]);
 
-  //   const loopBuffer = audioContextRef.current.createBuffer(
-  //     2,
-  //     audioContextRef.current.sampleRate * totalDuration,
-  //     audioContextRef.current.sampleRate,
-  //   );
+  // const playSound = useCallback(
+  //   async (state: State) => {
+  //     if (!audioContextRef.current || !audioBuffers) return;
+  //     console.log(state)
+  //     const source = audioContextRef.current.createBufferSource();
+  //     source.buffer = audioBuffers[state];
+  //     source.connect(audioContextRef.current.destination);
+  //     source.onended = () => {
+  //       setTimeout(() => {
+  //         if (!isPlaying) return;
+  //         transitionToNextState();
+  //       }, 0)
+  //     };
+  //     source.start();
+  //   },
+  //   [audioBuffers, transitionToNextState, isPlaying]
+  // );
 
-  //   let offset = 0;
-  //   for (const buffer of buffers) {
-  //     loopBuffer.copyToChannel(buffer.getChannelData(0), 0, offset);
-  //     loopBuffer.copyToChannel(buffer.getChannelData(1), 1, offset);
-  //     offset += buffer.length;
-  //   }
-
-  //   return loopBuffer;
-  // }, [audioBuffers])
-
-
-
-  const transitionToNextState = useCallback(() => {
-    if (!isPlaying || !audioBuffers) return;
+  const next = useCallback(async () => {
+    if (!audioBuffers || !audioContextRef.current) return;
     const currentIndex = states.indexOf(currentState);
     let nextStateIndex = 0;
     const randomValue = Math.random();
@@ -96,56 +101,37 @@ export const App: FC = () => {
         break;
       }
     }
-    const nextState = states[nextStateIndex];
-    setCurrentState(nextState);
-    playSound(nextState);
-  }, [currentState, isPlaying, audioBuffers]);
+    setCurrentState(states[nextStateIndex]);
 
-  const playSound = useCallback(
-    (state: State) => {
-      if (!audioContextRef.current || !audioBuffers) return;
-      console.log(state)
-      const source = audioContextRef.current.createBufferSource();
-      source.buffer = audioBuffers[state];
-      source.connect(audioContextRef.current.destination);
-      source.onended = () => {
-        transitionToNextState();
-      };
-      source.start();
-    },
-    [audioBuffers, transitionToNextState],
-  );
+    // 音声を再生
+    const source = audioContextRef.current.createBufferSource();
+    source.buffer = audioBuffers[states[nextStateIndex]];
+    source.connect(audioContextRef.current.destination);
+    source.start();
+    // 再生終了を待つ
+    await new Promise<void>((resolve) => {
+      source.onended = () => resolve();
+    });
+  }, [audioBuffers, currentState]);
+
+  const startTicks = useCallback(async() => {
+    setTimeout(async () => {
+      if (!isPlaying) return;
+      await next()
+    }, 10)
+    // while (true) {
+    //   if (!isPlaying) break;
+    //   await next()
+    // }
+  }, [isPlaying, next])
 
   const handlePlay = useCallback(() => {
     if (isPlaying) return;
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext();
     }
-    // if (audioContextRef.current.state === 'suspended') {
-    //   audioContextRef.current.resume();
-    // }
     setIsPlaying(true);
-    playSound(currentState);
-  }, [isPlaying, playSound, currentState]);
-
-  // const startLoop = useCallback(async () => {
-  //   if (!audioContextRef.current) return;
-  //   while (isPlaying) {
-  //     const loopBuffer = await createLoopBuffer();
-  //     if (!loopBuffer) {
-  //       handleStop();
-  //       return
-  //     }
-  //     const source = audioContextRef.current.createBufferSource();
-  //     source.buffer = loopBuffer;
-  //     source.connect(audioContextRef.current.destination);
-  //     source.start();
-
-  //     await new Promise<void>((resolve) => {
-  //       source.onended = () => resolve();
-  //     });
-  //   }
-  // }, [isPlaying, createLoopBuffer]);
+  }, [isPlaying]);
 
   const handleStop = () => {
     setIsPlaying(false);
@@ -155,19 +141,15 @@ export const App: FC = () => {
     setCurrentState("b");
   };
 
-  const init = useCallback(async() => {
+  const init = useCallback(async () => {
     audioContextRef.current = new AudioContext();
     await loadAudioFiles();
-  }, [loadAudioFiles])
+    startTicks();
+  }, [loadAudioFiles, startTicks])
 
   useEffect(() => {
     init()
   }, [init]);
-
-  // useEffect(() => {
-  //   startLoop();
-  // }, [startLoop]);
-
 
   return (
     <main className="max-w-screen-[1000px] mx-auto text-center">
