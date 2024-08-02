@@ -1,18 +1,15 @@
-# React Template
+# しかのこMC
 
-- Vite
-  - React
-  - TypeScript
-  - SWC
-- Biome with some opinionated settings
+## 推移行列
 
-## Usage
+| P | b | し | か | の | こ | た | ん |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **b** | 1/2 | 1/2 | 0 | 0 | 0 | 0 | 0 |
+| **し** | 0 | 0 | 1/2 | 0 | 0 | 1/2 | 0 |
+| **か** | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+| **の** | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| **こ** | 0 | 1/4 | 0 | 1/2 | 1/4 | 0 | 0 |
+| **た** | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| **ん** | 1/2 | 0 | 0 | 0 | 0 | 1/2 | 0 |
 
-### Select a package manager
 
-- Choose one of the following package managers
-  - npm
-  - yarn
-  - pnpm
-  - bun
-- Comment out the line in `.gitignore` since the lock file should be committed
