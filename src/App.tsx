@@ -2,7 +2,6 @@ import { FC, useCallback, useEffect, useRef, useState } from "react"
 import { Arrow } from "./Arrow"
 import { CyclicArrow } from "./CyclicArrow"
 import { StateNode } from "./StateNode"
-import { sleep } from "./lib/time"
 
 const states = ["b", "し", "か", "の", "こ", "た", "ん"] as const
 type State = (typeof states)[number]
