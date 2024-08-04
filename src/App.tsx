@@ -1,4 +1,6 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react"
+import { Arrow } from "./Arrow"
+import { CyclicArrow } from "./CyclicArrow"
 import { StateNode } from "./StateNode"
 import { sleep } from "./lib/time"
 
@@ -22,7 +24,7 @@ const P = [
 	[0, 1 / 4, 0, 1 / 2, 1 / 4, 0, 0],
 	[0, 0, 0, 0, 0, 0, 1],
 	[1 / 2, 0, 0, 0, 0, 1 / 2, 0]
-] as const
+]
 
 export const App: FC = () => {
 	const audioContextRef = useRef<AudioContext | null>(null)
@@ -59,7 +61,6 @@ export const App: FC = () => {
 	}, [])
 
 	const next = useCallback(async () => {
-		console.log("run next")
 		if (!audioBuffers || !audioContextRef.current) return
 		const currentIndex = states.indexOf(currentState)
 		let nextStateIndex = 0
@@ -73,7 +74,6 @@ export const App: FC = () => {
 			}
 		}
 		const nextState = states[nextStateIndex]
-		console.log(nextState)
 		setCurrentState(nextState)
 
 		// 音声を再生
@@ -84,7 +84,7 @@ export const App: FC = () => {
 		// 再生終了を待つ
 		await new Promise<void>((resolve) => {
 			source.onended = async () => {
-				await sleep(100)
+				// await sleep(1000)
 				resolve()
 			}
 		})
@@ -106,6 +106,19 @@ export const App: FC = () => {
 		audioContextRef.current = null
 	}
 
+	// const updateP = useCallback((newP: number[][]) => {
+	//   for (const row of newP) {
+	//     if (row.length !== 7) return
+	//     let sum = 0
+	//     for (const p of row) {
+	//       if (p < 0 || p > 1) return
+	//       sum += p
+	//     }
+	//     if (sum !== 1) return
+	//   }
+	//   setP(newP)
+	// }, [])
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Emit when step changes
 	useEffect(() => {
 		if (!isPlaying) return
@@ -113,7 +126,7 @@ export const App: FC = () => {
 	}, [steps, isPlaying])
 
 	return (
-		<main className="max-w-screen-[1000px] mx-auto text-center">
+		<main className="mx-auto text-center">
 			<div className="relative my-6 mx-auto w-[750px] h-[450px]">
 				<StateNode
 					isCurrent={currentState === "b"}
@@ -157,23 +170,136 @@ export const App: FC = () => {
 				>
 					ん
 				</StateNode>
+
+				{/* b -> し */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 275, y: 100 }}
+					mid={{ x: 330, y: 100 }}
+					end={{ x: 345, y: 185 }}
+					offset={{ x: 20, y: -20 }}
+				/>
+
+				{/* b -> b */}
+				<CyclicArrow
+					value={"1/2"}
+					center={{ x: 225, y: 43 }}
+					radius={30}
+					startAngle={(Math.PI * 5) / 6}
+					endAngle={(Math.PI * 1) / 6}
+					offset={{ x: 0, y: -40 }}
+				/>
+
+				{/* し -> か */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 405, y: 185 }}
+					mid={{ x: 420, y: 100 }}
+					end={{ x: 475, y: 100 }}
+					offset={{ x: -20, y: -20 }}
+				/>
+
+				{/* か -> の */}
+				<Arrow
+					value={"1"}
+					start={{ x: 575, y: 100 }}
+					mid={{ x: 630, y: 100 }}
+					end={{ x: 645, y: 185 }}
+					offset={{ x: 20, y: -20 }}
+				/>
+
+				{/* の -> こ */}
+				<Arrow
+					value={"1"}
+					start={{ x: 645, y: 265 }}
+					mid={{ x: 630, y: 350 }}
+					end={{ x: 575, y: 350 }}
+					offset={{ x: 20, y: 20 }}
+				/>
+
+				{/* こ -> の */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 545, y: 305 }}
+					mid={{ x: 570, y: 225 }}
+					end={{ x: 625, y: 225 }}
+					offset={{ x: -20, y: -20 }}
+				/>
+
+				{/* こ -> こ */}
+				<CyclicArrow
+					value={"1/4"}
+					center={{ x: 525, y: 407 }}
+					radius={30}
+					endAngle={(Math.PI * 7) / 6}
+					startAngle={(-Math.PI * 1) / 6}
+					offset={{ x: 0, y: -20 }}
+				/>
+
+				{/* こ -> し */}
+				<Arrow
+					value={"1/4"}
+					start={{ x: 475, y: 350 }}
+					mid={{ x: 445, y: 350 }}
+					end={{ x: 405, y: 265 }}
+					offset={{ x: -20, y: 20 }}
+				/>
+
+				{/* し -> た */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 345, y: 265 }}
+					mid={{ x: 330, y: 350 }}
+					end={{ x: 275, y: 350 }}
+					offset={{ x: 20, y: 20 }}
+				/>
+
+				{/* た -> ん */}
+				<Arrow
+					value={"1"}
+					start={{ x: 175, y: 350 }}
+					mid={{ x: 145, y: 350 }}
+					end={{ x: 105, y: 265 }}
+					offset={{ x: -20, y: 20 }}
+				/>
+
+				{/* ん -> た */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 125, y: 225 }}
+					mid={{ x: 180, y: 225 }}
+					end={{ x: 195, y: 310 }}
+					offset={{ x: 20, y: -20 }}
+				/>
+
+				{/* ん -> b */}
+				<Arrow
+					value={"1/2"}
+					start={{ x: 105, y: 185 }}
+					mid={{ x: 120, y: 100 }}
+					end={{ x: 175, y: 100 }}
+					offset={{ x: -20, y: -20 }}
+				/>
 			</div>
-			<button
-				type="button"
-				className="bg-red-950 text-white font-bold p-4 text-4xl rounded-lg hover:brightness-150 disabled:bg-stone-500 mr-4"
-				onClick={handleStart}
-				disabled={isPlaying}
-			>
-				スタート
-			</button>
-			<button
-				type="button"
-				className="bg-gray-900 text-white font-bold p-4 text-4xl rounded-lg hover:brightness-150 disabled:bg-stone-500"
-				onClick={handleStop}
-				disabled={!isPlaying}
-			>
-				ストップ
-			</button>
+
+			<div className="flex justify-center items-center gap-2 md:gap-8 whitespace-nowrap">
+				<button
+					type="button"
+					className="bg-[#6D2A1A] text-white font-bold p-4 text-4xl rounded-lg enabled:hover:brightness-150 disabled:bg-stone-500 disabled:cursor-not-allowed enabled:animate-bounce"
+					onClick={handleStart}
+					disabled={isPlaying}
+				>
+					スタート
+				</button>
+				<button
+					type="button"
+					className="bg-[#6D2A1A] text-white font-bold p-4 text-4xl rounded-lg enabled:hover:brightness-150 disabled:bg-stone-500 disabled:cursor-not-allowed"
+					onClick={handleStop}
+					disabled={!isPlaying}
+				>
+					ストップ
+				</button>
+			</div>
 		</main>
 	)
 }
