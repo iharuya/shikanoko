@@ -9,9 +9,9 @@ const stateToAudioName = {
 	b: "beat",
 	し: "shi",
 	か: "ka",
-	の: "no-1",
-	こ: "ko-1",
-	た: "tan",
+	の: "no",
+	こ: "ko",
+	た: "ta",
 	ん: "n"
 } satisfies Record<State, string>
 
