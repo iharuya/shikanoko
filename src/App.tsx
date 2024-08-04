@@ -27,6 +27,7 @@ const P = [
 
 export const App: FC = () => {
 	const audioContextRef = useRef<AudioContext | null>(null)
+	const [isLoading, setIsLoading] = useState(false)
 	const [isPlaying, setIsPlaying] = useState(false)
 	const [currentState, setCurrentState] = useState<State>("b")
 	const [audioBuffers, setAudioBuffers] = useState<Record<
@@ -93,8 +94,10 @@ export const App: FC = () => {
 	const handleStart = useCallback(async () => {
 		if (isPlaying) return
 		if (!audioContextRef.current) {
+			setIsLoading(true)
 			audioContextRef.current = new AudioContext()
 			await loadAudioFiles()
+			setIsLoading(false)
 		}
 		setIsPlaying(true)
 	}, [isPlaying, loadAudioFiles])
@@ -286,7 +289,7 @@ export const App: FC = () => {
 					type="button"
 					className="bg-[#6D2A1A] text-white font-bold p-4 text-4xl rounded-lg enabled:hover:brightness-150 disabled:bg-stone-500 disabled:cursor-not-allowed enabled:animate-bounce"
 					onClick={handleStart}
-					disabled={isPlaying}
+					disabled={isPlaying || isLoading}
 				>
 					スタート
 				</button>
@@ -294,11 +297,15 @@ export const App: FC = () => {
 					type="button"
 					className="bg-[#6D2A1A] text-white font-bold p-4 text-4xl rounded-lg enabled:hover:brightness-150 disabled:bg-stone-500 disabled:cursor-not-allowed"
 					onClick={handleStop}
-					disabled={!isPlaying}
+					disabled={!isPlaying || isLoading}
 				>
 					ストップ
 				</button>
 			</div>
+
+			{isLoading && (
+				<p className="my-6 text-stone-500 animate-pulse">よみこみちゅう...</p>
+			)}
 		</main>
 	)
 }

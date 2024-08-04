@@ -15,7 +15,7 @@ export const StateNode: FC<PropsWithChildren<Props>> = ({
 			<div
 				className={cn(
 					"relative bg-white w-[100px] h-[100px] rounded-full border-[10px] border-stone-400",
-					isCurrent && "border-[#965745]"
+					isCurrent && "border-[#965745] animate-[bounce_300ms_infinite]"
 				)}
 			>
 				{isCurrent && (
